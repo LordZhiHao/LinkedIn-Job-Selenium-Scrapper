@@ -19,7 +19,7 @@ def scrape_linkedin_jobs(job_title: str, location: str, pages: int = None) -> li
 
     Parameters
     ----------
-    job_title : str
+    job_title : str 
         The job title to search for on LinkedIn.
     location : str
         The location to search for jobs in on LinkedIn.
@@ -41,7 +41,8 @@ def scrape_linkedin_jobs(job_title: str, location: str, pages: int = None) -> li
     pages = pages or 1
 
     # Set up the Selenium web driver
-    driver = webdriver.Chrome("chromedriver.exe")
+    executable_path="C:/Users/Jason/Desktop/IS3107/chromedriver.exe"
+    driver = webdriver.Chrome()
 
     # Set up Chrome options to maximize the window
     options = webdriver.ChromeOptions()
@@ -49,6 +50,7 @@ def scrape_linkedin_jobs(job_title: str, location: str, pages: int = None) -> li
 
     # Initialize the web driver with the Chrome options
     driver = webdriver.Chrome(options=options)
+    # driver = webdriver.Chrome()
 
     # Navigate to the LinkedIn job search page with the given job title and location
     driver.get(
@@ -62,6 +64,8 @@ def scrape_linkedin_jobs(job_title: str, location: str, pages: int = None) -> li
         logging.info(f"Scrolling to bottom of page {i+1}...")
 
         # Scroll to the bottom of the page using JavaScript
+        wait = WebDriverWait(driver, 10)
+        wait.until(EC.presence_of_element_located((By.TAG_NAME, "body")))
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
         try:
@@ -162,7 +166,7 @@ def scrape_linkedin_jobs(job_title: str, location: str, pages: int = None) -> li
     return jobs
 
 
-def save_job_data(data: dict) -> None:
+def save_job_data(data: dict, jobName: str) -> None:
     """
     Save job data to a CSV file.
 
@@ -177,11 +181,12 @@ def save_job_data(data: dict) -> None:
     df = pd.DataFrame(data)
 
     # Save the DataFrame to a CSV file without including the index column
-    df.to_csv("jobs.csv", index=False)
+    jobName = jobName or 'jobs.csv'
+    df.to_csv(jobName, index=False)
 
     # Log a message indicating how many jobs were successfully scraped and saved to the CSV file
     logging.info(f"Successfully scraped {len(data)} jobs and saved to jobs.csv")
 
 
-data = scrape_linkedin_jobs("Data analyst", "US")
-save_job_data(data)
+data = scrape_linkedin_jobs("Machine learning engineer", "Singapore", 30)
+save_job_data(data, "machineLearningEngineer_jobs.csv")
